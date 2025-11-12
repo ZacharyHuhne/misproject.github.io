@@ -67,12 +67,13 @@
         .carousel-track {
             display: flex;
             /* Define variables for calculation */
-            --slide-width: 240px; /* UPDATED: Smaller width for mobile */
+            --slide-width: 240px; /* Base width for mobile */
             --gap: 1rem; /* 16px */
             
             /* Calculate total width: (var(--slide-width) + var(--gap)) * 14 slides (7 real + 7 clones) */
             width: calc( (var(--slide-width) + var(--gap)) * 14 );
-            /* Increased duration for smoother, slower scroll with more images */
+            
+            /* UPDATED: Animation is now the default */
             animation: marquee 60s linear infinite; 
         }
 
@@ -108,8 +109,36 @@
                 --slide-width: 300px; /* Restore original width on sm screens and up */
             }
         }
+
+        /* NEW: Styles for mobile slideshow buttons */
+        .carousel-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+        }
+        .carousel-button:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .carousel-button.prev {
+            left: 1rem;
+        }
+        .carousel-button.next {
+            right: 1rem;
+        }
     </style>
-     <!-- Alpine.js for interactivity (still needed for mobile menu) -->
+     <!-- Alpine.js for interactivity -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body x-data="{ isMenuOpen: false }">
@@ -169,68 +198,125 @@
                 <div class="card col-span-1 lg:col-span-2">
                     <!-- Reduced padding from p-6 md:p-8 to p-4 -->
                     <div class="p-4">
-                        <!-- Added text-center -->
-                        <h3 class="font-bold text-slate-800 text-2xl mb-4 text-center">Photography</h3>
                         
-                        <!-- Pure CSS Marquee Carousel -->
-                        <div class="relative w-full max-w-lg mx-auto">
+                        <!-- UPDATED: Added Alpine.js component -->
+                        <div x-data="{
+                                isMobile: false,
+                                init() {
+                                    // Check if we're on a mobile screen
+                                    if (window.innerWidth < 768) {
+                                        this.isMobile = true;
+                                        // Use $nextTick to wait for refs to be available
+                                        this.$nextTick(() => {
+                                            // 1. Stop the CSS marquee animation
+                                            this.$refs.track.style.animation = 'none';
+                                            // 2. Make the container scrollable with snap
+                                            this.$refs.container.style.overflowX = 'auto';
+                                            this.$refs.container.style.scrollSnapType = 'x mandatory';
+                                            // 3. Make each slide snap to the center
+                                            this.$refs.track.querySelectorAll('.carousel-slide').forEach(slide => {
+                                                slide.style.scrollSnapAlign = 'center';
+                                            });
+                                        });
+                                    }
+                                    // On desktop (else), we do nothing and let the CSS animation run
+                                },
+                                next() {
+                                    let container = this.$refs.container;
+                                    // Get slide width and gap from computed CSS variables
+                                    let style = getComputedStyle(this.$refs.track);
+                                    let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
+                                    let gap = parseInt(style.getPropertyValue('--gap'));
+                                    // Scroll by one slide + one gap
+                                    container.scrollBy({ left: slideWidth + gap, behavior: 'smooth' });
+                                },
+                                prev() {
+                                    let container = this.$refs.container;
+                                    let style = getComputedStyle(this.$refs.track);
+                                    let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
+                                    let gap = parseInt(style.getPropertyValue('--gap'));
+                                    // Scroll by one slide + one gap
+                                    container.scrollBy({ left: -(slideWidth + gap), behavior: 'smooth' });
+                                }
+                            }" x-init="init()" class="max-w-xl mx-auto">
                             
-                            <!-- Carousel Viewport (Scrollable Container) -->
-                            <div class="carousel-container">
-                                <!-- Track contains 2 sets of slides for seamless loop -->
-                                <div class="carousel-track">
-                                    <!-- Set 1 (Now 7 images) -->
-                                    <div class="carousel-slide">
-                                        <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    
-                                    <!-- Set 2 (Clones - Now 7 images) -->
-                                    <div class="carousel-slide">
-                                        <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                    </div>
-                                    <div class="carousel-slide">
-                                        <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                            <h3 class="font-bold text-slate-800 text-2xl mb-4 text-center">Photography</h3>
+                            
+                            <!-- This relative wrapper holds the carousel AND the buttons -->
+                            <div class="relative w-full mx-auto">
+                                
+                                <!-- Carousel Viewport (Scrollable Container) -->
+                                <!-- Added x-ref="container" -->
+                                <div x-ref="container" class="carousel-container">
+                                    <!-- Track contains 2 sets of slides for seamless loop -->
+                                    <!-- Added x-ref="track" -->
+                                    <div x-ref="track" class="carousel-track">
+                                        <!-- Set 1 (Now 7 images) -->
+                                        <div class="carousel-slide">
+                                            <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        
+                                        <!-- Set 2 (Clones - Now 7 images) -->
+                                        <div class="carousel-slide">
+                                            <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                        <div class="carousel-slide">
+                                            <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- NEW: Prev/Next Buttons (Mobile Only) -->
+                                <template x-if="isMobile">
+                                    <button @click="prev()" x-cloak class="carousel-button prev">
+                                        <svg class="w-6 h-6" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+                                    </button>
+                                </template>
+                                <template x-if="isMobile">
+                                    <button @click="next()" x-cloak class="carousel-button next">
+                                        <svg class="w-6 h-6" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
+                                    </button>
+                                </template>
                             </div>
-                        </div>
-                        
-                        <p class="text-slate-600 mt-6">
-                            My passion for photography started when I was in community college and I took a black and white film photography class. Since then, I have been out and about shooting photos of architecture, nature, cars, wildlife, and so much more. Photography is important to me because it allows me to express myself and show other people the little details in life that I find interesting. Here are some of my favorite shots!
-                        </p>
+                            
+                            <!-- Paragraph is now inside the max-w-xl wrapper -->
+                            <p class="text-slate-600 mt-6">
+                                My passion for photography started when I was in community college and I took a black and white film photography class. Since then, I have been out and about shooting photos of architecture, nature, cars, wildlife, and so much more. Photography is important to me because it allows me to express myself and show other people the little details in life that I find interesting. Here are some of my favorite shots!
+                            </p>
+                        </div> <!-- End of Alpine component wrapper -->
                     </div>
                 </div>
 
@@ -289,4 +375,5 @@
     </script>
 </body>
 </html>
+
 
