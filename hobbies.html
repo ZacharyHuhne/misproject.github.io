@@ -195,48 +195,86 @@
              <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
                 <!-- Photography Section with Carousel -->
-                <div class="card col-span-1 lg:col-span-2">
+                <!-- UPDATED: Changed lg:col-span-2 to col-span-1 -->
+                <div class="card col-span-1">
                     <!-- Reduced padding from p-6 md:p-8 to p-4 -->
                     <div class="p-4">
                         
                         <!-- UPDATED: Added Alpine.js component -->
                         <div x-data="{
                                 isMobile: false,
-                                init() {
-                                    // Check if we're on a mobile screen
-                                    if (window.innerWidth < 768) {
-                                        this.isMobile = true;
-                                        // Use $nextTick to wait for refs to be available
-                                        this.$nextTick(() => {
-                                            // 1. Stop the CSS marquee animation
+                                carouselInterval: null,
+                                
+                                // Function to check screen size and apply logic
+                                checkScreen() {
+                                    let mobile = window.innerWidth < 768; // md breakpoint
+                                    if (mobile === this.isMobile) return; // No change
+                                    
+                                    this.isMobile = mobile;
+                                    
+                                    this.$nextTick(() => {
+                                        if (this.isMobile) {
+                                            // ON MOBILE: Stop CSS animation, add scroll snap
                                             this.$refs.track.style.animation = 'none';
-                                            // 2. Make the container scrollable with snap
                                             this.$refs.container.style.overflowX = 'auto';
                                             this.$refs.container.style.scrollSnapType = 'x mandatory';
-                                            // 3. Make each slide snap to the center
                                             this.$refs.track.querySelectorAll('.carousel-slide').forEach(slide => {
                                                 slide.style.scrollSnapAlign = 'center';
                                             });
-                                        });
-                                    }
-                                    // On desktop (else), we do nothing and let the CSS animation run
+                                        } else {
+                                            // ON DESKTOP: Restart CSS animation, remove scroll snap
+                                            this.$refs.track.style.animation = ''; // Reset to CSS default
+                                            this.$refs.container.style.overflowX = 'hidden';
+                                            this.$refs.container.style.scrollSnapType = 'none';
+                                            this.$refs.track.querySelectorAll('.carousel-slide').forEach(slide => {
+                                                slide.style.scrollSnapAlign = 'unset';
+                                            });
+                                        }
+                                    });
                                 },
+                                
+                                init() {
+                                    // 1. Initial check
+                                    this.checkScreen();
+                                    
+                                    // 2. Listen for window resize
+                                    window.addEventListener('resize', () => this.checkScreen());
+                                },
+                                
                                 next() {
                                     let container = this.$refs.container;
-                                    // Get slide width and gap from computed CSS variables
                                     let style = getComputedStyle(this.$refs.track);
                                     let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
                                     let gap = parseInt(style.getPropertyValue('--gap'));
-                                    // Scroll by one slide + one gap
-                                    container.scrollBy({ left: slideWidth + gap, behavior: 'smooth' });
+                                    
+                                    // Check if we're near the end of the *first* set of images
+                                    let scrollAmount = slideWidth + gap;
+                                    let maxScroll = this.$refs.track.scrollWidth / 2;
+                                    
+                                    if (container.scrollLeft + scrollAmount >= maxScroll - slideWidth) {
+                                        // Jump back to the start (instant, no animation)
+                                        container.scrollBy({ left: -maxScroll, behavior: 'auto' });
+                                    }
+                                    
+                                    // Perform the smooth scroll
+                                    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
                                 },
+
                                 prev() {
                                     let container = this.$refs.container;
                                     let style = getComputedStyle(this.$refs.track);
                                     let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
                                     let gap = parseInt(style.getPropertyValue('--gap'));
-                                    // Scroll by one slide + one gap
-                                    container.scrollBy({ left: -(slideWidth + gap), behavior: 'smooth' });
+                                    
+                                    let scrollAmount = slideWidth + gap;
+                                    let maxScroll = this.$refs.track.scrollWidth / 2;
+
+                                    if (container.scrollLeft - scrollAmount <= 0) {
+                                        // Jump to the end (instant, no animation)
+                                        container.scrollBy({ left: maxScroll, behavior: 'auto' });
+                                    }
+                                    
+                                    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
                                 }
                             }" x-init="init()" class="max-w-xl mx-auto">
                             
@@ -282,7 +320,7 @@
                                             <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
                                         </div>
                                         <div class="carousel-slide">
-                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='httpshttps://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
                                         </div>
                                         <div class="carousel-slide">
                                             <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
@@ -322,9 +360,9 @@
 
                 <!-- Fishing Section -->
                 <div class="card">
-                    <!-- UPDATED Image to local path -->
                     <img src="images/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
-                    <div class="p-6 md:p-8">
+                    <!-- UPDATED: Padding changed from p-6 md:p-8 to p-4 md:p-6 -->
+                    <div class="p-4 md:p-6">
                         <h3 class="font-bold text-slate-800 text-2xl">Fishing</h3>
                         <p class="text-slate-600 mt-4">
                             Fishing is one of my favorite things to do on my off days. Being out on the water by itself is very calming, and the excitment of having a fish on the line is the cherry on top. I enjoy fishing on the lake during the summer, but I also love to ice fish.
@@ -334,14 +372,24 @@
 
                 <!-- Weightlifting Section -->
                 <div class="card">
-                    <!-- UPDATED Image to local path -->
-                    <img src="images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
-                    <div class="p-6 md:p-8">
-                        <!-- UPDATED Title -->
+                    <img src="images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='httpsExample.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
+                    <!-- UPDATED: Padding changed from p-6 md:p-8 to p-4 md:p-6 -->
+                    <div classV="p-4 md:p-6">
                         <h3 class="font-bold text-slate-800 text-2xl">Weightlifting</h3>
                         <p class="text-slate-600 mt-4">
                             On my free time, I love to lift weights in the gym. Going to the gym everyday gives me a sense of satisfaction and accomplishment. One of my goals is to be able to bench press 225 pounds. I work hard every day to try to make that happen.
                         </p>
+                    </div>
+                </div>
+
+                <!-- NEW: Snowboarding Section -->
+                <div class="card">
+                    <img src="images/snowboarding.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person snowboarding down a slope" onerror="this.src='https://placehold.co/600x400/6b7280/ffffff?text=snowboarding.jpg+not+found'; this.alt='Image not found'">
+                    <div class="p-4 md:p-6">
+                        <h3 class="font-bold text-slate-800 text-2xl">Snowboarding</h3>
+                        <p class="text-slate-600 mt-4">
+                            Living in Duluth gives me easy access to Spirit Mountain. I love spending time on the slopes during the winter, enjoying the snow and the challenge of the terrain.
+                        </I>
                     </div>
                 </div>
 
@@ -375,5 +423,6 @@
     </script>
 </body>
 </html>
+
 
 
