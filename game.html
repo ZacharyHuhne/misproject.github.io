@@ -35,6 +35,14 @@
                 font-size: 1.5rem; /* text-xl */
             }
         }
+        
+        /* --- NEW: HIDE CARDS ON MOBILE --- */
+        @media (max-width: 767px) { /* md breakpoint */
+            .card {
+                display: none; /* Hides all card elements on mobile */
+            }
+        }
+
 
         /* Card back style */
         .card.back {
@@ -281,10 +289,13 @@
             <div class="w-full md:w-3/4 order-2 md:order-1">
                 <!-- Dealer's Area -->
                 <div class="mb-8">
-                    <!-- UPDATED: Responsive text size -->
-                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white">
+                    <!-- UPDATED: Responsive text size, hidden on mobile -->
+                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white hidden md:block">
                         Dealer's Hand: <span id="dealerScoreEl" class="font-bold">0</span>
                     </h2>
+                    <!-- NEW: Mobile-only Dealer Score -->
+                    <div id="dealerScoreMobile" class="md:hidden text-6xl text-white font-bold text-center">0</div>
+
                     <!-- UPDATED: min-height -->
                     <div id="dealerHandEl" class="flex justify-center items-center gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg">
                         <!-- Cards will be dynamically inserted here -->
@@ -293,13 +304,13 @@
 
                 <!-- Player's Area -->
                 <div class="mb-8">
-                    <!-- UPDATED: Responsive text size -->
-                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white">
+                    <!-- UPDATED: Responsive text size, hidden on mobile -->
+                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white hidden md:block">
                         Your Hand: <span id="playerScoreEl" class="font-bold">0</span>
                     </h2>
                     <!-- Player Hand Element: Now a flex container for split hands -->
-                    <!-- UPDATED: min-height -->
-                    <div id="playerHandEl" class="flex justify-center items-start gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
+                    <!-- UPDATED: min-height, flex-col on mobile -->
+                    <div id="playerHandEl" class="flex flex-col md:flex-row justify-center items-start gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
                         <!-- 
                             When not split, one .hand-container will be here.
                             When split, two .hand-container elements will be here.
@@ -362,6 +373,7 @@
         // --- DOM Elements ---
         const messageEl = document.getElementById('messageEl');
         const dealerScoreEl = document.getElementById('dealerScoreEl');
+        const dealerScoreMobile = document.getElementById('dealerScoreMobile'); // NEW
         const dealerHandEl = document.getElementById('dealerHandEl');
         const playerScoreEl = document.getElementById('playerScoreEl');
         const playerHandEl = document.getElementById('playerHandEl');
@@ -580,14 +592,16 @@
                 playerScoreEl.textContent = "0";
             }
             
-
+            let dealerScoreText = "0";
             if (showDealerFullScore) {
                 const dealerScore = calculateScore(dealerHand);
                 dealerScoreEl.textContent = dealerScore;
+                dealerScoreMobile.textContent = dealerScore; // NEW
             } else {
                 const visibleCard = dealerHand.slice(1);
                 const dealerScore = calculateScore(visibleCard);
                 dealerScoreEl.textContent = dealerScore;
+                dealerScoreMobile.textContent = dealerScore; // NEW
             }
         }
         
@@ -599,7 +613,8 @@
             handContainer.className = 'hand-container flex-1'; // flex-1 to share space
             
             const handScoreEl = document.createElement('span');
-            handScoreEl.className = 'font-bold text-lg text-white/70 block text-center mb-2';
+            // UPDATED: Added responsive classes for mobile score
+            handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:text-lg md:text-white/70';
             handScoreEl.textContent = '0';
             
             const handCardsEl = document.createElement('div');
@@ -1228,6 +1243,7 @@
             dealerHandEl.innerHTML = '';
             playerScoreEl.textContent = '0';
             dealerScoreEl.textContent = '0';
+            dealerScoreMobile.textContent = '0'; // NEW
             
             updateWagerButtons();
             dealButton.disabled = true;
@@ -1356,3 +1372,4 @@
     </script>
 </body>
 </html>
+
