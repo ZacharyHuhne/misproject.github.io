@@ -9,8 +9,9 @@
     <style>
         /* Custom styles for the playing cards */
         .card {
-            width: 100px;
-            height: 150px;
+            /* UPDATED: Mobile-first card size */
+            width: 80px;
+            height: 120px;
             background-color: white;
             border: 1px solid #ccc;
             border-radius: 8px;
@@ -20,12 +21,21 @@
             display: inline-flex; /* Use flex to align content */
             flex-direction: column;
             justify-content: space-between;
-            font-size: 1.5rem; /* Base font size for value */
+            /* UPDATED: Mobile-first font size */
+            font-size: 1.25rem; 
             font-weight: bold;
-            /* Added transition for split animation */
             transition: all 0.3s ease-in-out; 
         }
         
+        /* UPDATED: Scale cards up on larger screens */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .card {
+                width: 100px;
+                height: 150px;
+                font-size: 1.5rem; /* text-xl */
+            }
+        }
+
         /* Card back style */
         .card.back {
             background-color: #2563eb; /* A nice blue */
@@ -56,7 +66,8 @@
 
         /* Position the big suit in the center */
         .card-suit-center {
-            font-size: 3.5rem; /* Larger suit icon */
+            /* UPDATED: Mobile-first suit size */
+            font-size: 2.5rem;
             text-align: center;
             opacity: 0.9;
             line-height: 1;
@@ -65,6 +76,13 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+        }
+        
+        /* UPDATED: Scale suit up on larger screens */
+        @media (min-width: 640px) { /* sm breakpoint */
+            .card-suit-center {
+                font-size: 3.5rem;
+            }
         }
 
         /* Position the bottom-right value (rotated) */
@@ -125,7 +143,8 @@
             justify-content: center;
             align-items: center;
             flex-wrap: nowrap; /* Prevent wrapping by default */
-            min-height: 150px;
+            /* UPDATED: min-height for smaller cards */
+            min-height: 130px;
         }
         /* Highlight for the active split hand */
         .hand-container.active-hand {
@@ -133,11 +152,18 @@
             box-shadow: 0 0 15px rgba(245, 158, 11, 0.5);
         }
 
-        /* NEW: Overlapping cards for split hands */
+        /* UPDATED: Overlapping cards for split hands (mobile-first) */
         .hand-container.split-hand .card {
-            margin-left: -65px; /* Overlap cards by 65px */
+            margin-left: -50px; /* Overlap cards by 50px on mobile */
             flex-shrink: 0; /* Prevent cards from shrinking */
         }
+        
+        @media (min-width: 640px) { /* sm breakpoint */
+             .hand-container.split-hand .card {
+                margin-left: -65px; /* Overlap by 65px on desktop */
+            }
+        }
+
         /* Don't overlap the first card */
         .hand-container.split-hand .card:first-child {
             margin-left: 0;
@@ -186,6 +212,14 @@
             border: 3px dashed rgba(255, 255, 255, 0.7);
         }
 
+        /* NEW: Disable chip animation on mobile */
+        @media (max-width: 767px) { /* md breakpoint */
+            .falling-chip {
+                animation: none;
+                display: none;
+            }
+        }
+
     </style>
 </head>
 <!-- UPDATED: Removed background-image style and added bg-green-900 class -->
@@ -212,16 +246,18 @@
 
     <!-- Animation Overlay (Increased z-index) -->
     <div id="animationOverlay" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div id="animationContent" class="text-6xl font-bold text-white p-8 rounded-lg">
+        <!-- UPDATED: Responsive text size -->
+        <div id="animationContent" class="text-4xl md:text-6xl font-bold text-white p-8 rounded-lg">
             <!-- Content will be set by JS -->
         </div>
     </div>
     
     <!-- Game Over Overlay -->
     <!-- ADDED 'flex' class here to fix centering -->
-    <div id="gameOverOverlay" class="hidden fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-40">
-        <div class="text-5xl font-bold text-red-500 mb-6">GAME OVER</div>
-        <div class="text-2xl text-white mb-8">You've run out of money!</div>
+    <div id="gameOverOverlay" class="hidden fixed inset-0 bg-black/70 flex flex-col items-center justify-center z-40 p-4">
+        <!-- UPDATED: Responsive text size -->
+        <div class="text-4xl md:text-5xl font-bold text-red-500 mb-6">GAME OVER</div>
+        <div class="text-xl md:text-2xl text-white mb-8">You've run out of money!</div>
         <button id="playAgainButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg text-2xl transition-all">
             Play Again
         </button>
@@ -229,8 +265,9 @@
 
     <!-- Main Game Panel (Increased z-index) -->
     <!-- Added id="gamePanel" for collision detection -->
-    <div id="gamePanel" class="w-full max-w-4xl mx-auto p-6 bg-green-800 rounded-lg shadow-2xl relative z-10">
-        <h1 class="text-3xl font-bold text-center mb-4 text-white">Blackjack</h1>
+    <div id="gamePanel" class="w-full max-w-4xl mx-auto p-4 md:p-6 bg-green-800 rounded-lg shadow-2xl relative z-10">
+        <!-- UPDATED: Responsive text size -->
+        <h1 class="text-2xl md:text-3xl font-bold text-center mb-4 text-white">Blackjack</h1>
 
         <!-- Message Bar -->
         <div id="messageEl" class="text-center text-xl font-bold mb-6 h-8 transition-all duration-300">
@@ -244,21 +281,25 @@
             <div class="w-full md:w-3/4 order-2 md:order-1">
                 <!-- Dealer's Area -->
                 <div class="mb-8">
-                    <h2 class="text-2xl font-semibold mb-3 text-white">
+                    <!-- UPDATED: Responsive text size -->
+                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white">
                         Dealer's Hand: <span id="dealerScoreEl" class="font-bold">0</span>
                     </h2>
-                    <div id="dealerHandEl" class="flex justify-center items-center gap-3 min-h-[170px] bg-green-900/50 p-4 rounded-lg">
+                    <!-- UPDATED: min-height -->
+                    <div id="dealerHandEl" class="flex justify-center items-center gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg">
                         <!-- Cards will be dynamically inserted here -->
                     </div>
                 </div>
 
                 <!-- Player's Area -->
                 <div class="mb-8">
-                    <h2 class="text-2xl font-semibold mb-3 text-white">
+                    <!-- UPDATED: Responsive text size -->
+                    <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white">
                         Your Hand: <span id="playerScoreEl" class="font-bold">0</span>
                     </h2>
                     <!-- Player Hand Element: Now a flex container for split hands -->
-                    <div id="playerHandEl" class="flex justify-center items-start gap-3 min-h-[170px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
+                    <!-- UPDATED: min-height -->
+                    <div id="playerHandEl" class="flex justify-center items-start gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
                         <!-- 
                             When not split, one .hand-container will be here.
                             When split, two .hand-container elements will be here.
@@ -398,7 +439,7 @@
             }
             
             animationContent.innerHTML = content;
-            animationContent.className = `text-6xl font-bold text-white p-8 rounded-lg ${bgColor} run-animation`;
+            animationContent.className = `text-4xl md:text-6xl font-bold text-white p-8 rounded-lg ${bgColor} run-animation`; // Responsive text
             animationOverlay.classList.remove('hidden');
             
             setTimeout(() => {
@@ -564,7 +605,7 @@
             const handCardsEl = document.createElement('div');
             // This is the element that holds the cards
             // NEW: Add 'flex-nowrap' and 'gap-3'
-            handCardsEl.className = 'flex justify-center items-center flex-nowrap gap-3';
+            handCardsEl.className = 'flex justify-center items-center flex-nowrap';
             
             // This container holds the score and the cards
             const innerContainer = document.createElement('div');
@@ -1267,6 +1308,12 @@
          * Starts generating chips at intervals
          */
         function startChipAnimation() {
+            // UPDATED: Check for mobile before starting
+            if (window.innerWidth < 768) {
+                console.log("Chip animation disabled on mobile.");
+                return; // Don't run animation on mobile
+            }
+
             // Create an initial burst of chips
             for(let i = 0; i < 15; i++) {
                 // Stagger the first burst
