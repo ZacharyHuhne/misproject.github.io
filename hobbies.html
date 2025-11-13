@@ -59,11 +59,18 @@
         [x-cloak] { display: none !important; }
 
         /* Style for the slideshow image */
-        /*.slideshow-image {
+        .slideshow-image {
             width: 100%;
             height: 100%;
             object-fit: contain; /* This makes the whole photo visible */
-        
+        }
+
+        /* Media query for mobile devices */
+        @media (max-width: 768px) {
+            .lg\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+        }
 
     </style>
      <!-- Alpine.js for interactivity -->
@@ -237,6 +244,7 @@
     </script>
 </body>
 </html>
+
 
 
 
