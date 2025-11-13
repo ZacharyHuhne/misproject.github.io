@@ -20,7 +20,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: url('Imagee/background3.jpg'); /* FIXED Path */
+            background-image: url('Images/background3.jpg'); /* FIXED Path */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -50,9 +50,17 @@
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            background-color: rgba(255, 255, 255, 0.98);
         }
         [x-cloak] { display: none !important; }
 
@@ -120,61 +128,70 @@
              <!-- UPDATED: Responsive gap -->
              <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
-                <!-- Photography Section with Carousel -->
-                <!-- FIXED: Reverted to lg:col-span-2 -->
                 <div class="card col-span-1 lg:col-span-2">
-                    
-                    <!-- FIXED: This Alpine component is now the slideshow header image -->
-                    <div x-data="{
-                            activeSlide: 0,
-                            slides: [
-                                { src: 'Imagee/startrail.jpeg', alt: 'Star trail photograph' },
-                                { src: 'Imagee/sillydeer.jpeg', alt: 'Photograph of a deer' },
-                                { src: 'Imagee/caraurora.jpeg', alt: 'Photograph of a car and the aurora' },
-                                { src: 'Imagee/car.jpeg', alt: 'Photograph of a car' },
-                                { src: 'Imagee/frozenwaterfall.jpeg', alt: 'Photograph of a frozen waterfall' },
-                                { src: 'Imagee/bird.jpeg', alt: 'Photograph of a bird' },
-                                { src: 'Imagee/motorcycle.jpeg', alt: 'Photograph of a motorcycle' }
-                            ],
-                            init() {
-                                setInterval(() => {
-                                    this.activeSlide = (this.activeSlide + 1) % this.slides.length
-                                }, 5000); /* 5 seconds */
-                            }
-                        }" class="relative w-full h-56 overflow-hidden rounded-t-lg bg-gray-900"> <!-- FIXED: This structure matches the other cards -->
+                    <!-- Reduced padding from p-6 md:p-8 to p-4 -->
+                    <div class="p-4">
                         
-                        <!-- Slideshow Container -->
-                        <template x-for="(slide, index) in slides" :key="index">
-                            <div
-                                x-show="activeSlide === index"
-                                class="absolute inset-0"
-                                x-transition:enter="transition-opacity ease-out duration-1000"
-                                x-transition:enter-start="opacity-0"
-                                x-transition:enter-end="opacity-100"
-                                x-transition:leave="transition-opacity ease-in duration-1000"
-                                x-transition:leave-start="opacity-100"
-                                x-transition:leave-end="opacity-0"
-                                x-cloak
-                            >
-                                <img :src="slide.src" :alt="slide.alt" class="slideshow-image" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                            </div>
-                        </template>
+                        <!-- UPDATED: Removed max-w-xl mx-auto -->
+                        <div x-data="{
+                                activeSlide: 0,
+                                slides: [
+                                    { src: 'Images/startrail.jpeg', alt: 'Star trail photograph' },
+                                    { src: 'Images/sillydeer.jpeg', alt: 'Photograph of a deer' },
+                                    { src: 'Images/caraurora.jpeg', alt: 'Photograph of a car and the aurora' },
+                                    { src: 'Images/car.jpeg', alt: 'Photograph of a car' },
+                                    { src: 'Images/frozenwaterfall.jpeg', alt: 'Photograph of a frozen waterfall' },
+                                    { src: 'Images/bird.jpeg', alt: 'Photograph of a bird' },
+                                    { src: 'Images/motorcycle.jpeg', alt: 'Photograph of a motorcycle' }
+                                ],
+                                init() {
+                                    setInterval(() => {
+                                        this.activeSlide = (this.activeSlide + 1) % this.slides.length
+                                    }, 5000); /* 5 seconds */
+                                }
+                            }" class="">
+                            
+                            <!-- This relative wrapper holds the carousel AND the buttons -->
+                            <div class="relative w-full mx-auto">
+                                
+                                <!-- NEW: Slideshow Container -->
+                                <!-- UPDATED: Changed max-w-md to max-w-2xl -->
+                                <div class="relative w-full max-w-2xl mx-auto aspect-square overflow-hidden rounded-lg shadow-inner bg-gray-900">
+                                    <template x-for="(slide, index) in slides" :key="index">
+                                        <div
+                                            x-show="activeSlide === index"
+                                            class="absolute inset-0"
+                                            x-transition:enter="transition-opacity ease-out duration-1000"
+                                            x-transition:enter-start="opacity-0"
+                                            x-transition:enter-end="opacity-100"
+                                            x-transition:leave="transition-opacity ease-in duration-1000"
+                                            x-transition:leave-start="opacity-100"
+                                            x-transition:leave-end="opacity-0"
+                                            x-cloak
+                                        >
+                                            <!-- FIXED: Changed class to slideshow-image -->
+                                            <img :src="slide.src" :alt="slide.alt" class="slideshow-image" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                        </div>
+                                    </template>
+                                </div>
 
-                    </div> <!-- End of slideshow div -->
-                    
-                    <!-- FIXED: This is the text content div, matching other cards -->
-                    <div class="p-6 md:p-8">
-                        <h3 class="font-bold text-slate-800 text-2xl mb-4">Photography</h3>
-                        <p class="text-slate-600 mt-4">
-                            My passion for photography started when I was in community college and I took a black and white film photography class. Since then, I have been out and about shooting photos of architecture, nature, cars, wildlife, and so much more. Photography is important to me because it allows me to express myself and show other people the little details in life that I find interesting. Here are some of my favorite shots!
-                        </p>
+                            </div>
+                            
+                            <!-- UPDATED: Header is now below slideshow -->
+                            <h3 class="font-bold text-slate-800 text-2xl mb-4 text-center mt-6">Photography</h3>
+                            
+                            <!-- UPDATED: Paragraph is now below header and will stretch -->
+                            <p class="text-slate-600 mt-6">
+                                My passion for photography started when I was in community college and I took a black and white film photography class. Since then, I have been out and about shooting photos of architecture, nature, cars, wildlife, and so much more. Photography is important to me because it allows me to express myself and show other people the little details in life that I find interesting. Here are some of my favorite shots!
+                            </p>
+                        </div> <!-- End of Alpine component wrapper -->
                     </div>
                 </div>
 
                 <!-- Fishing Section -->
                 <div class="card">
                     <!-- FIXED: UPDATED Image to local path -->
-                    <img src="Imagee/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
+                    <img src="Images/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
                     <div class="p-6 md:p-8">
                         <h3 class="font-bold text-slate-800 text-2xl">Fishing</h3>
                         <p class="text-slate-600 mt-4">
@@ -186,7 +203,7 @@
                 <!-- Weightlifting Section -->
                 <div class="card">
                     <!-- FIXED: UPDATED Image to local path -->
-                    <img src="Imagee/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not.found'">
+                    <img src="Images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
                     <div class="p-6 md:p-8">
                         <!-- UPDATED Title -->
                         <h3 class="font-bold text-slate-800 text-2xl">Weightlifting</h3>
