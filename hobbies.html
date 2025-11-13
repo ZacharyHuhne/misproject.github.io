@@ -20,7 +20,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: url('images/background3.jpg');
+            background-image: url('Images/background3.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -56,87 +56,11 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* Carousel Styles */
-        .carousel-container {
-            /* This is the viewport */
-            max-width: 100%; /* Take full width of card */
-            overflow: hidden; /* Hide the scrolling */
-            position: relative;
-        }
+        /* REMOVED all old carousel styles (.carousel-container, .carousel-track, 
+          .carousel-slide, @keyframes marquee, .carousel-button) 
+          as they are no longer needed for the new slideshow.
+        */
 
-        .carousel-track {
-            display: flex;
-            /* Define variables for calculation */
-            --slide-width: 240px; /* Base width for mobile */
-            --gap: 1rem; /* 16px */
-            
-            /* Calculate total width: (var(--slide-width) + var(--gap)) * 14 slides (7 real + 7 clones) */
-            width: calc( (var(--slide-width) + var(--gap)) * 14 );
-            
-            /* UPDATED: Animation is now the default */
-            animation: marquee 60s linear infinite; 
-        }
-
-        .carousel-slide {
-            flex-shrink: 0; /* Don't let slides shrink */
-            width: var(--slide-width); /* Uses the CSS variable */
-            margin-right: var(--gap);
-            aspect-ratio: 1 / 1;
-            overflow: hidden;
-            border-radius: 0.5rem;
-            position: relative;
-        }
-        .carousel-slide img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        /* Keyframe animation for the continuous scroll */
-        @keyframes marquee {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                /* Move left by the width of *one* full set (7 slides + 7 gaps) */
-                transform: translateX(calc( (var(--slide-width) + var(--gap)) * -7 ));
-            }
-        }
-
-        /* NEW: Media query for larger screens */
-        @media (min-width: 640px) { /* sm breakpoint */
-            .carousel-track {
-                --slide-width: 300px; /* Restore original width on sm screens and up */
-            }
-        }
-
-        /* NEW: Styles for mobile slideshow buttons */
-        .carousel-button {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.4);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            z-index: 10;
-        }
-        .carousel-button:hover {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-        .carousel-button.prev {
-            left: 1rem;
-        }
-        .carousel-button.next {
-            right: 1rem;
-        }
     </style>
      <!-- Alpine.js for interactivity -->
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -195,162 +119,58 @@
              <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
                 <!-- Photography Section with Carousel -->
-                <!-- UPDATED: Changed lg:col-span-2 to col-span-1 -->
-                <div class="card col-span-1">
+                <div class="card col-span-1 lg:col-span-2">
                     <!-- Reduced padding from p-6 md:p-8 to p-4 -->
                     <div class="p-4">
                         
-                        <!-- UPDATED: Added Alpine.js component -->
+                        <!-- UPDATED: Removed max-w-xl mx-auto -->
                         <div x-data="{
-                                isMobile: false,
-                                carouselInterval: null,
-                                
-                                // Function to check screen size and apply logic
-                                checkScreen() {
-                                    let mobile = window.innerWidth < 768; // md breakpoint
-                                    if (mobile === this.isMobile) return; // No change
-                                    
-                                    this.isMobile = mobile;
-                                    
-                                    this.$nextTick(() => {
-                                        if (this.isMobile) {
-                                            // ON MOBILE: Stop CSS animation, add scroll snap
-                                            this.$refs.track.style.animation = 'none';
-                                            this.$refs.container.style.overflowX = 'auto';
-                                            this.$refs.container.style.scrollSnapType = 'x mandatory';
-                                            this.$refs.track.querySelectorAll('.carousel-slide').forEach(slide => {
-                                                slide.style.scrollSnapAlign = 'center';
-                                            });
-                                        } else {
-                                            // ON DESKTOP: Restart CSS animation, remove scroll snap
-                                            this.$refs.track.style.animation = ''; // Reset to CSS default
-                                            this.$refs.container.style.overflowX = 'hidden';
-                                            this.$refs.container.style.scrollSnapType = 'none';
-                                            this.$refs.track.querySelectorAll('.carousel-slide').forEach(slide => {
-                                                slide.style.scrollSnapAlign = 'unset';
-                                            });
-                                        }
-                                    });
-                                },
-                                
+                                activeSlide: 0,
+                                slides: [
+                                    { src: 'Images/startrail.jpeg', alt: 'Star trail photograph' },
+                                    { src: 'Images/sillydeer.jpeg', alt: 'Photograph of a deer' },
+                                    { src: 'Images/caraurora.jpeg', alt: 'Photograph of a car and the aurora' },
+                                    { src: 'Images/car.jpeg', alt: 'Photograph of a car' },
+                                    { src: 'Images/frozenwaterfall.jpeg', alt: 'Photograph of a frozen waterfall' },
+                                    { src: 'Images/bird.jpeg', alt: 'Photograph of a bird' },
+                                    { src: 'Images/motorcycle.jpeg', alt: 'Photograph of a motorcycle' }
+                                ],
                                 init() {
-                                    // 1. Initial check
-                                    this.checkScreen();
-                                    
-                                    // 2. Listen for window resize
-                                    window.addEventListener('resize', () => this.checkScreen());
-                                },
-                                
-                                next() {
-                                    let container = this.$refs.container;
-                                    let style = getComputedStyle(this.$refs.track);
-                                    let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
-                                    let gap = parseInt(style.getPropertyValue('--gap'));
-                                    
-                                    // Check if we're near the end of the *first* set of images
-                                    let scrollAmount = slideWidth + gap;
-                                    let maxScroll = this.$refs.track.scrollWidth / 2;
-                                    
-                                    if (container.scrollLeft + scrollAmount >= maxScroll - slideWidth) {
-                                        // Jump back to the start (instant, no animation)
-                                        container.scrollBy({ left: -maxScroll, behavior: 'auto' });
-                                    }
-                                    
-                                    // Perform the smooth scroll
-                                    container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                                },
-
-                                prev() {
-                                    let container = this.$refs.container;
-                                    let style = getComputedStyle(this.$refs.track);
-                                    let slideWidth = parseInt(style.getPropertyValue('--slide-width'));
-                                    let gap = parseInt(style.getPropertyValue('--gap'));
-                                    
-                                    let scrollAmount = slideWidth + gap;
-                                    let maxScroll = this.$refs.track.scrollWidth / 2;
-
-                                    if (container.scrollLeft - scrollAmount <= 0) {
-                                        // Jump to the end (instant, no animation)
-                                        container.scrollBy({ left: maxScroll, behavior: 'auto' });
-                                    }
-                                    
-                                    container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+                                    setInterval(() => {
+                                        this.activeSlide = (this.activeSlide + 1) % this.slides.length
+                                    }, 5000); /* 5 seconds */
                                 }
-                            }" x-init="init()" class="max-w-xl mx-auto">
-                            
-                            <h3 class="font-bold text-slate-800 text-2xl mb-4 text-center">Photography</h3>
+                            }" class="">
                             
                             <!-- This relative wrapper holds the carousel AND the buttons -->
                             <div class="relative w-full mx-auto">
                                 
-                                <!-- Carousel Viewport (Scrollable Container) -->
-                                <!-- Added x-ref="container" -->
-                                <div x-ref="container" class="carousel-container">
-                                    <!-- Track contains 2 sets of slides for seamless loop -->
-                                    <!-- Added x-ref="track" -->
-                                    <div x-ref="track" class="carousel-track">
-                                        <!-- Set 1 (Now 7 images) -->
-                                        <div class="carousel-slide">
-                                            <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                <!-- NEW: Slideshow Container -->
+                                <!-- UPDATED: Changed max-w-md to max-w-2xl -->
+                                <div class="relative w-full max-w-2xl mx-auto aspect-square overflow-hidden rounded-lg shadow-inner">
+                                    <template x-for="(slide, index) in slides" :key="index">
+                                        <div
+                                            x-show="activeSlide === index"
+                                            class="absolute inset-0"
+                                            x-transition:enter="transition-opacity ease-out duration-1000"
+                                            x-transition:enter-start="opacity-0"
+                                            x-transition:enter-end="opacity-100"
+                                            x-transition:leave="transition-opacity ease-in duration-1000"
+                                            x-transition:leave-start="opacity-100"
+                                            x-transition:leave-end="opacity-0"
+                                            x-cloak
+                                        >
+                                            <img :src="slide.src" :alt="slide.alt" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
                                         </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        
-                                        <!-- Set 2 (Clones - Now 7 images) -->
-                                        <div class="carousel-slide">
-                                            <img src="images/startrail.jpeg" alt="Star trail photograph" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/sillydeer.jpeg" alt="Photograph of a deer" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/caraurora.jpeg" alt="Photograph of a car and the aurora" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/car.jpeg" alt="Photograph of a car" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/frozenwaterfall.jpeg" alt="Photograph of a frozen waterfall" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/bird.jpeg" alt="Photograph of a bird" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                        <div class="carousel-slide">
-                                            <img src="images/motorcycle.jpeg" alt="Photograph of a motorcycle" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
-                                        </div>
-                                    </div>
+                                    </template>
                                 </div>
 
-                                <!-- NEW: Prev/Next Buttons (Mobile Only) -->
-                                <template x-if="isMobile">
-                                    <button @click="prev()" x-cloak class="carousel-button prev">
-                                        <svg class="w-6 h-6" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
-                                    </button>
-                                </template>
-                                <template x-if="isMobile">
-                                    <button @click="next()" x-cloak class="carousel-button next">
-                                        <svg class="w-6 h-6" fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
-                                    </button>
-                                </template>
                             </div>
                             
-                            <!-- Paragraph is now inside the max-w-xl wrapper -->
+                            <!-- UPDATED: Header is now below slideshow -->
+                            <h3 class="font-bold text-slate-800 text-2xl mb-4 text-center mt-6">Photography</h3>
+                            
+                            <!-- UPDATED: Paragraph is now below header and will stretch -->
                             <p class="text-slate-600 mt-6">
                                 My passion for photography started when I was in community college and I took a black and white film photography class. Since then, I have been out and about shooting photos of architecture, nature, cars, wildlife, and so much more. Photography is important to me because it allows me to express myself and show other people the little details in life that I find interesting. Here are some of my favorite shots!
                             </p>
@@ -360,9 +180,9 @@
 
                 <!-- Fishing Section -->
                 <div class="card">
-                    <img src="images/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
-                    <!-- UPDATED: Padding changed from p-6 md:p-8 to p-4 md:p-6 -->
-                    <div class="p-4 md:p-6">
+                    <!-- UPDATED Image to local path -->
+                    <img src="Images/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
+                    <div class="p-6 md:p-8">
                         <h3 class="font-bold text-slate-800 text-2xl">Fishing</h3>
                         <p class="text-slate-600 mt-4">
                             Fishing is one of my favorite things to do on my off days. Being out on the water by itself is very calming, and the excitment of having a fish on the line is the cherry on top. I enjoy fishing on the lake during the summer, but I also love to ice fish.
@@ -372,25 +192,13 @@
 
                 <!-- Weightlifting Section -->
                 <div class="card">
-                    <!-- FIXED TYPO: onerror path was broken -->
-                    <img src="images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
-                    <!-- FIXED TYPO: classV to class -->
-                    <div class="p-4 md:p-6">
+                    <!-- UPDATED Image to local path -->
+                    <img src="Images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
+                    <div class="p-6 md:p-8">
+                        <!-- UPDATED Title -->
                         <h3 class="font-bold text-slate-800 text-2xl">Weightlifting</h3>
                         <p class="text-slate-600 mt-4">
                             On my free time, I love to lift weights in the gym. Going to the gym everyday gives me a sense of satisfaction and accomplishment. One of my goals is to be able to bench press 225 pounds. I work hard every day to try to make that happen.
-                        </p>
-                    </div>
-                </div>
-
-                <!-- NEW: Snowboarding Section -->
-                <div class="card">
-                    <img src="images/snowboarding.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person snowboarding down a slope" onerror="this.src='https://placehold.co/600x400/6b7280/ffffff?text=snowboarding.jpg+not+found'; this.alt='Image not found'">
-                    <div class="p-4 md:p-6">
-                        <h3 class="font-bold text-slate-800 text-2xl">Snowboarding</h3>
-                        <p class="text-slate-600 mt-4">
-                            Living in Duluth gives me easy access to Spirit Mountain. I love spending time on the slopes during the winter, enjoying the snow and the challenge of the terrain.
-                        <!-- FIXED TYPO: </I> to </p> -->
                         </p>
                     </div>
                 </div>
@@ -425,6 +233,7 @@
     </script>
 </body>
 </html>
+
 
 
 
