@@ -20,7 +20,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-image: url('Images/background3.jpg');
+            background-image: url('Images/background3.jpg'); /* FIXED Path */
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -60,7 +60,7 @@
         .slideshow-image {
             width: 100%;
             height: 100%;
-            object-fit: contain; /* UPDATED: Changed back to contain */
+            object-fit: contain; /* This makes the whole photo visible */
         }
 
     </style>
@@ -148,7 +148,7 @@
                                 
                                 <!-- NEW: Slideshow Container -->
                                 <!-- UPDATED: Changed max-w-md to max-w-2xl -->
-                                <div class="relative w-full max-w-2xl mx-auto aspect-square overflow-hidden rounded-lg shadow-inner">
+                                <div class="relative w-full max-w-2xl mx-auto aspect-square overflow-hidden rounded-lg shadow-inner bg-gray-900">
                                     <template x-for="(slide, index) in slides" :key="index">
                                         <div
                                             x-show="activeSlide === index"
@@ -161,7 +161,8 @@
                                             x-transition:leave-end="opacity-0"
                                             x-cloak
                                         >
-                                            <img :src="slide.src" :alt="slide.alt" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
+                                            <!-- FIXED: Changed class to slideshow-image -->
+                                            <img :src="slide.src" :alt="slide.alt" class="slideshow-image" onerror="this.src='https://placehold.co/600x600/ef4444/ffffff?text=Image+Not+Found'; this.alt='Error loading image.'">
                                         </div>
                                     </template>
                                 </div>
@@ -181,7 +182,7 @@
 
                 <!-- Fishing Section -->
                 <div class="card">
-                    <!-- UPDATED Image to local path -->
+                    <!-- FIXED: UPDATED Image to local path -->
                     <img src="Images/manfishingonalake.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person fishing on a calm lake" onerror="this.src='https://placehold.co/600x400/5fa8d3/ffffff?text=manfishingonalake.jpg+not+found'; this.alt='Image not found'">
                     <div class="p-6 md:p-8">
                         <h3 class="font-bold text-slate-800 text-2xl">Fishing</h3>
@@ -193,7 +194,7 @@
 
                 <!-- Weightlifting Section -->
                 <div class="card">
-                    <!-- UPDATED Image to local path -->
+                    <!-- FIXED: UPDATED Image to local path -->
                     <img src="Images/weights.jpg" class="rounded-t-lg w-full h-56 object-cover" alt="A person deadlifting weights in a gym" onerror="this.src='https://placehold.co/600x400/606c38/ffffff?text=weights.jpg+not+found'; this.alt='Image not found'">
                     <div class="p-6 md:p-8">
                         <!-- UPDATED Title -->
