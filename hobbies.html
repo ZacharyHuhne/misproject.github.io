@@ -56,10 +56,12 @@
         }
         [x-cloak] { display: none !important; }
 
-        /* REMOVED all old carousel styles (.carousel-container, .carousel-track, 
-          .carousel-slide, @keyframes marquee, .carousel-button) 
-          as they are no longer needed for the new slideshow.
-        */
+        /* Style for the slideshow image */
+        .slideshow-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* UPDATED: Changed back to contain */
+        }
 
     </style>
      <!-- Alpine.js for interactivity -->
@@ -118,7 +120,6 @@
              <!-- UPDATED: Responsive gap -->
              <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 
-                <!-- Photography Section with Carousel -->
                 <div class="card col-span-1 lg:col-span-2">
                     <!-- Reduced padding from p-6 md:p-8 to p-4 -->
                     <div class="p-4">
