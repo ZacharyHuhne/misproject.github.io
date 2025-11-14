@@ -226,6 +226,105 @@
                 animation: none;
                 display: none;
             }
+            
+            /* Compact mobile layout */
+            body {
+                padding: 0.25rem !important;
+            }
+            
+            #gamePanel {
+                padding: 0.75rem !important;
+                margin: 0.25rem;
+            }
+            
+            h1 {
+                font-size: 1.25rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            #messageEl {
+                font-size: 0.875rem !important;
+                margin-bottom: 0.75rem !important;
+                min-height: 1.5rem !important;
+                height: auto !important;
+            }
+            
+            .mb-8 {
+                margin-bottom: 0.5rem !important;
+            }
+            
+            #dealerHandEl, #playerHandEl {
+                min-height: 60px !important;
+                max-height: 80px !important;
+                padding: 0.375rem !important;
+            }
+            
+            /* Override the min-h-[150px] class on mobile */
+            .min-h-\[150px\] {
+                min-height: 60px !important;
+            }
+            
+            #dealerScoreMobile .text-6xl {
+                font-size: 2.25rem !important;
+            }
+            
+            #playerScoreMobile .text-6xl {
+                font-size: 2rem !important;
+            }
+            
+            #dealerScoreMobile, #playerScoreMobile {
+                padding: 0.125rem 0 !important;
+            }
+            
+            #dealerScoreMobile .text-sm, #playerScoreMobile .text-sm {
+                font-size: 0.75rem !important;
+                margin-bottom: 0.125rem !important;
+            }
+            
+            /* Hide entire hand-container on mobile (we use centered playerScoreMobile instead) */
+            .hand-container {
+                display: none !important;
+            }
+            
+            .bg-green-700 {
+                padding: 0.75rem !important;
+            }
+            
+            h3 {
+                font-size: 1rem !important;
+                margin-bottom: 0.5rem !important;
+            }
+            
+            .text-lg {
+                font-size: 0.875rem !important;
+            }
+            
+            button {
+                padding: 0.5rem 0.75rem !important;
+                font-size: 0.875rem !important;
+            }
+            
+            #wagerArea button, #buttonArea button {
+                padding: 0.5rem !important;
+                font-size: 0.8125rem !important;
+            }
+            
+            .flex.flex-col.md\:flex-row {
+                gap: 0.75rem !important;
+            }
+            
+            /* Back button on mobile */
+            .absolute.top-4.left-4 {
+                top: 0.25rem !important;
+                left: 0.25rem !important;
+                padding: 0.375rem 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+            
+            /* Ensure gap between cards is maintained */
+            .gap-3 {
+                gap: 0.5rem !important;
+            }
         }
 
     </style>
@@ -293,11 +392,14 @@
                     <h2 class="text-xl md:text-2xl font-semibold mb-3 text-white hidden md:block">
                         Dealer's Hand: <span id="dealerScoreEl" class="font-bold">0</span>
                     </h2>
-                    <!-- NEW: Mobile-only Dealer Score -->
-                    <div id="dealerScoreMobile" class="md:hidden text-6xl text-white font-bold text-center">0</div>
 
-                    <!-- UPDATED: min-height -->
-                    <div id="dealerHandEl" class="flex justify-center items-center gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg">
+                    <!-- UPDATED: min-height, dealer score inside on mobile -->
+                    <div id="dealerHandEl" class="flex flex-col md:flex-row justify-center items-center gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg">
+                        <!-- NEW: Mobile-only Dealer Score with label -->
+                        <div id="dealerScoreMobile" class="md:hidden text-center">
+                            <div class="text-sm text-white/80 mb-1">Dealer</div>
+                            <div class="text-6xl text-white font-bold">0</div>
+                        </div>
                         <!-- Cards will be dynamically inserted here -->
                     </div>
                 </div>
@@ -310,7 +412,12 @@
                     </h2>
                     <!-- Player Hand Element: Now a flex container for split hands -->
                     <!-- UPDATED: min-height, flex-col on mobile -->
-                    <div id="playerHandEl" class="flex flex-col md:flex-row justify-center items-start gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
+                    <div id="playerHandEl" class="flex flex-col md:flex-row justify-center items-center gap-3 min-h-[150px] bg-green-900/50 p-4 rounded-lg overflow-x-auto">
+                        <!-- NEW: Mobile-only Player Score with label (centered like dealer) -->
+                        <div id="playerScoreMobile" class="md:hidden text-center">
+                            <div class="text-sm text-white/80 mb-1">Your Hand</div>
+                            <div class="text-6xl text-white font-bold">0</div>
+                        </div>
                         <!-- 
                             When not split, one .hand-container will be here.
                             When split, two .hand-container elements will be here.
@@ -377,6 +484,7 @@
         const dealerHandEl = document.getElementById('dealerHandEl');
         const playerScoreEl = document.getElementById('playerScoreEl');
         const playerHandEl = document.getElementById('playerHandEl');
+        const playerScoreMobile = document.getElementById('playerScoreMobile'); // NEW
         const dealButton = document.getElementById('dealButton');
         const hitButton = document.getElementById('hitButton');
         const standButton = document.getElementById('standButton');
@@ -579,29 +687,55 @@
          */
         function updateScores(showDealerFullScore = false) {
             // Update score for each player hand
-            playerHands.forEach(handObj => {
+            playerHands.forEach((handObj, index) => {
                 const score = calculateScore(handObj.hand);
                 handObj.scoreEl.textContent = score;
             });
             // Update main score display with active hand's score
+            let playerScore = "0";
             if (playerHands.length > 0 && currentHandIndex < playerHands.length) {
-                playerScoreEl.textContent = calculateScore(playerHands[currentHandIndex].hand);
+                playerScore = calculateScore(playerHands[currentHandIndex].hand);
+                playerScoreEl.textContent = playerScore;
             } else if (playerHands.length > 0) {
-                 playerScoreEl.textContent = calculateScore(playerHands[0].hand);
+                 playerScore = calculateScore(playerHands[0].hand);
+                 playerScoreEl.textContent = playerScore;
             } else {
                 playerScoreEl.textContent = "0";
+            }
+            
+            // Update mobile player score (centered in dark green section)
+            if (playerScoreMobile) {
+                const playerScoreNumber = playerScoreMobile.querySelector('.text-6xl');
+                const playerScoreLabel = playerScoreMobile.querySelector('.text-sm');
+                if (playerScoreNumber) {
+                    playerScoreNumber.textContent = playerScore;
+                }
+                // Update label for split hands
+                if (playerScoreLabel && playerHands.length > 1) {
+                    playerScoreLabel.textContent = `Hand ${currentHandIndex + 1}`;
+                } else if (playerScoreLabel) {
+                    playerScoreLabel.textContent = 'Your Hand';
+                }
             }
             
             let dealerScoreText = "0";
             if (showDealerFullScore) {
                 const dealerScore = calculateScore(dealerHand);
                 dealerScoreEl.textContent = dealerScore;
-                dealerScoreMobile.textContent = dealerScore; // NEW
+                // Update mobile dealer score (inside the dark green section)
+                const dealerScoreNumber = dealerScoreMobile?.querySelector('.text-6xl');
+                if (dealerScoreNumber) {
+                    dealerScoreNumber.textContent = dealerScore;
+                }
             } else {
                 const visibleCard = dealerHand.slice(1);
                 const dealerScore = calculateScore(visibleCard);
                 dealerScoreEl.textContent = dealerScore;
-                dealerScoreMobile.textContent = dealerScore; // NEW
+                // Update mobile dealer score (inside the dark green section)
+                const dealerScoreNumber = dealerScoreMobile?.querySelector('.text-6xl');
+                if (dealerScoreNumber) {
+                    dealerScoreNumber.textContent = dealerScore;
+                }
             }
         }
         
@@ -612,15 +746,16 @@
             const handContainer = document.createElement('div');
             handContainer.className = 'hand-container flex-1'; // flex-1 to share space
             
+            // Score number (for desktop only, mobile uses playerScoreMobile)
             const handScoreEl = document.createElement('span');
-            // UPDATED: Added responsive classes for mobile score
+            // UPDATED: Now includes mobile score display logic
             handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:text-lg md:text-white/70';
             handScoreEl.textContent = '0';
             
             const handCardsEl = document.createElement('div');
             // This is the element that holds the cards
             // NEW: Add 'flex-nowrap' and 'gap-3'
-            handCardsEl.className = 'flex justify-center items-center flex-nowrap';
+            handCardsEl.className = 'flex justify-center items-center flex-nowrap gap-3';
             
             // This container holds the score and the cards
             const innerContainer = document.createElement('div');
@@ -628,18 +763,39 @@
             innerContainer.appendChild(handCardsEl);
 
             handContainer.appendChild(innerContainer);
-            playerHandEl.appendChild(handContainer);
             
-            return {
-                hand: [],
-                bet: currentBet,
-                isFinished: false,
-                isBust: false,
-                isBlackjack: false,
-                element: handCardsEl, // Where cards go
-                container: handContainer, // The whole hand element
-                scoreEl: handScoreEl // The score display
-            };
+            // NEW: Check if this is the first hand
+            if (playerHands.length === 0) {
+                // This is the first hand, use the dedicated mobile score display
+                playerHandEl.appendChild(handContainer);
+                handScoreEl.classList.add('hidden', 'md:block'); // Hide desktop score on mobile
+                
+                return {
+                    hand: [],
+                    bet: currentBet,
+                    isFinished: false,
+                    isBust: false,
+                    isBlackjack: false,
+                    element: handCardsEl, // Where cards go
+                    container: handContainer, // The whole hand element
+                    scoreEl: playerScoreMobile.querySelector('.text-6xl') // Use the MAIN mobile score
+                };
+            } else {
+                // This is a split hand, append it and use its own score display
+                playerHandEl.appendChild(handContainer);
+                handScoreEl.classList.remove('md:text-lg', 'md:text-white/70'); // Use mobile styles (large text)
+                
+                return {
+                    hand: [],
+                    bet: currentBet,
+                    isFinished: false,
+                    isBust: false,
+                    isBlackjack: false,
+                    element: handCardsEl, // Where cards go
+                    container: handContainer, // The whole hand element
+                    scoreEl: handScoreEl // Use its OWN score element
+                };
+            }
         }
         
         /**
@@ -654,6 +810,8 @@
                     handObj.container.classList.remove('active-hand');
                 }
             });
+            // Update the main mobile score label
+            updateScores();
         }
         
         /**
@@ -692,6 +850,13 @@
 
             playerHandEl.innerHTML = '';
             dealerHandEl.innerHTML = '';
+            // Re-add mobile score displays
+            if (dealerScoreMobile) {
+                dealerHandEl.appendChild(dealerScoreMobile);
+            }
+            if (playerScoreMobile) {
+                playerHandEl.appendChild(playerScoreMobile);
+            }
             messageEl.textContent = "Your turn...";
             inGameBetEl.textContent = currentBet;
             inGameBetArea.classList.remove('hidden');
@@ -923,7 +1088,12 @@
                 playerHands.forEach(h => h.container.classList.remove('active-hand'));
 
                 // Reveal dealer's hidden card
+                // Preserve mobile score display
+                const mobileScoreDisplay = dealerHandEl.querySelector('#dealerScoreMobile');
                 dealerHandEl.innerHTML = '';
+                if (mobileScoreDisplay) {
+                    dealerHandEl.appendChild(mobileScoreDisplay);
+                }
                 dealerHand.forEach(card => dealerHandEl.appendChild(renderCard(card, false)));
                 updateScores(true);
 
@@ -1008,7 +1178,7 @@
             // Add new hand to the array
             playerHands.push(handObj2);
             
-            // Recalculate and show total bet
+            // RecalculTte and show total bet
             let totalBet = playerHands.reduce((acc, h) => acc + h.bet, 0);
             inGameBetEl.textContent = totalBet;
             
@@ -1035,14 +1205,38 @@
          * Logic for Dealer checking for Blackjack
          */
         function dealerCheckForBlackjack(playerHasBlackjack) {
-            const hiddenCardEl = dealerHandEl.children[0];
-            hiddenCardEl.classList.add('card-peek');
+            // Find the hidden card (it's the first card element, which might be after the mobile score display)
+            let hiddenCardEl = null;
+            for (let i = 0; i < dealerHandEl.children.length; i++) {
+                const child = dealerHandEl.children[i];
+                if (child.classList && child.classList.contains('card') && child.classList.contains('back')) {
+                    hiddenCardEl = child;
+                    break;
+                }
+            }
+            
+            // If we found the hidden card, animate it
+            if (hiddenCardEl) {
+                hiddenCardEl.classList.add('card-peek');
+            }
 
             setTimeout(() => {
-                hiddenCardEl.classList.remove('card-peek');
+                if (hiddenCardEl) {
+                    hiddenCardEl.classList.remove('card-peek');
+                }
                 const dealerScore = calculateScore(dealerHand);
 
                 if (dealerScore === 21) {
+                    // Reveal the dealer's hidden card when they have blackjack
+                    // Preserve mobile score display
+                    const mobileScoreDisplay = dealerHandEl.querySelector('#dealerScoreMobile');
+                    dealerHandEl.innerHTML = '';
+                    if (mobileScoreDisplay) {
+                        dealerHandEl.appendChild(mobileScoreDisplay);
+                    }
+                    dealerHand.forEach(card => dealerHandEl.appendChild(renderCard(card, false)));
+                    updateScores(true);
+                    
                     if (playerHasBlackjack) {
                         messageEl.textContent = 'Push! You and the Dealer have Blackjack.';
                         playerMoney += currentBet;
@@ -1072,6 +1266,9 @@
          * Logic for the dealer's turn
          */
         function dealerTurn() {
+            // FIXED BUG: Removed redundant playerHasBlackjack check
+            // If dealerTurn is called, the dealer *must* play.
+            
             let dealerScore = calculateScore(dealerHand);
 
             if (dealerScore < 17) {
@@ -1080,9 +1277,9 @@
                 dealerHand.push(card);
                 dealerHandEl.appendChild(renderCard(card, false));
                 updateScores(true);
-                setTimeout(dealerTurn, 1000);
+                setTimeout(dealerTurn, 1000); // Recursive call
             } else {
-                checkWinner(dealerScore);
+                checkWinner(dealerScore); // Final call
             }
         }
 
@@ -1243,7 +1440,26 @@
             dealerHandEl.innerHTML = '';
             playerScoreEl.textContent = '0';
             dealerScoreEl.textContent = '0';
-            dealerScoreMobile.textContent = '0'; // NEW
+            // Reset mobile scores
+            const dealerScoreNumber = dealerScoreMobile?.querySelector('.text-6xl');
+            if (dealerScoreNumber) {
+                dealerScoreNumber.textContent = '0';
+            }
+            const playerScoreNumber = playerScoreMobile?.querySelector('.text-6xl');
+            const playerScoreLabel = playerScoreMobile?.querySelector('.text-sm');
+            if (playerScoreNumber) {
+                playerScoreNumber.textContent = '0';
+            }
+            if (playerScoreLabel) {
+                playerScoreLabel.textContent = 'Your Hand';
+            }
+            // Re-add mobile score displays
+            if (dealerScoreMobile) {
+                dealerHandEl.appendChild(dealerScoreMobile);
+            }
+            if (playerScoreMobile) {
+                playerHandEl.appendChild(playerScoreMobile);
+            }
             
             updateWagerButtons();
             dealButton.disabled = true;
