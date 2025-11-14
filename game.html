@@ -687,18 +687,24 @@
          */
         function updateScores(showDealerFullScore = false) {
             // Update score for each player hand
-            playerHands.forEach(handObj => {
+            playerHands.forEach((handObj, index) => {
                 const score = calculateScore(handObj.hand);
                 handObj.scoreEl.textContent = score;
+                // --- NEW DESKTOP FIX ---
+                // Manually update the main H2 score for the active hand
+                if(index === currentHandIndex) {
+                    playerScoreEl.textContent = score;
+                }
             });
+
             // Update main score display with active hand's score
             let playerScore = "0";
             if (playerHands.length > 0 && currentHandIndex < playerHands.length) {
                 playerScore = calculateScore(playerHands[currentHandIndex].hand);
-                playerScoreEl.textContent = playerScore;
+                // playerScoreEl.textContent = playerScore; // Already set in loop
             } else if (playerHands.length > 0) {
                  playerScore = calculateScore(playerHands[0].hand);
-                 playerScoreEl.textContent = playerScore;
+                 // playerScoreEl.textContent = playerScore; // Already set in loop
             } else {
                 playerScoreEl.textContent = "0";
             }
@@ -710,8 +716,8 @@
                 if (playerScoreNumber) {
                     playerScoreNumber.textContent = playerScore;
                 }
-                // Update label for split hands
                 // --- FIXED "Hand 3" BUG ---
+                // Update label for split hands
                 if (playerScoreLabel && playerHands.length > 1 && currentHandIndex < playerHands.length) {
                     playerScoreLabel.textContent = `Hand ${currentHandIndex + 1}`;
                 } else if (playerScoreLabel) {
@@ -753,8 +759,9 @@
             
             // --- FIXED BUG: Only create handScoreEl for split hands ---
             if (playerHands.length === 0) {
-                // This is the first hand. It does NOT get its own score span.
-                // The main H2 (playerScoreEl) is used for desktop.
+                // This is the FIRST hand.
+                // It does NOT get its own score span.
+                // It uses the main H2 (playerScoreEl) for desktop.
                 // The main div (playerScoreMobile) is used for mobile.
                 handContainer.appendChild(handCardsEl);
                 playerHandEl.appendChild(handContainer);
@@ -770,9 +777,10 @@
                     scoreEl: playerScoreMobile.querySelector('.text-6xl') // Use the MAIN mobile score
                 };
             } else {
-                // This is a split hand. It gets its own score span.
+                // This is a SPLIT hand.
+                // It gets its own score span, which is ONLY visible on mobile.
                 const handScoreEl = document.createElement('span');
-                // --- FIXED "big number" BUG: Added md:hidden to hide on desktop ---
+                // text-6xl (for mobile) and md:hidden (hides on desktop)
                 handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:hidden'; 
                 handScoreEl.textContent = '0';
                 
