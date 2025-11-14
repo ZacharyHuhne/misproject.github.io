@@ -711,7 +711,8 @@
                     playerScoreNumber.textContent = playerScore;
                 }
                 // Update label for split hands
-                if (playerScoreLabel && playerHands.length > 1) {
+                // --- FIXED "Hand 3" BUG ---
+                if (playerScoreLabel && playerHands.length > 1 && currentHandIndex < playerHands.length) {
                     playerScoreLabel.textContent = `Hand ${currentHandIndex + 1}`;
                 } else if (playerScoreLabel) {
                     playerScoreLabel.textContent = 'Your Hand';
@@ -771,9 +772,9 @@
             } else {
                 // This is a split hand. It gets its own score span.
                 const handScoreEl = document.createElement('span');
-                handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:text-lg md:text-white/70';
+                // --- FIXED "big number" BUG: Added md:hidden to hide on desktop ---
+                handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:hidden'; 
                 handScoreEl.textContent = '0';
-                handScoreEl.classList.remove('md:text-lg', 'md:text-white/70'); // Use mobile styles
                 
                 const innerContainer = document.createElement('div');
                 innerContainer.appendChild(handScoreEl);
