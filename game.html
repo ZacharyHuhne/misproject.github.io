@@ -687,7 +687,7 @@
          */
         function updateScores(showDealerFullScore = false) {
             // Update score for each player hand
-            playerHands.forEach((handObj, index) => {
+            playerHands.forEach(handObj => {
                 const score = calculateScore(handObj.hand);
                 handObj.scoreEl.textContent = score;
             });
@@ -746,29 +746,17 @@
             const handContainer = document.createElement('div');
             handContainer.className = 'hand-container flex-1'; // flex-1 to share space
             
-            // Score number (for desktop only, mobile uses playerScoreMobile)
-            const handScoreEl = document.createElement('span');
-            // UPDATED: Now includes mobile score display logic
-            handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:text-lg md:text-white/70';
-            handScoreEl.textContent = '0';
-            
             const handCardsEl = document.createElement('div');
             // This is the element that holds the cards
-            // NEW: Add 'flex-nowrap' and 'gap-3'
             handCardsEl.className = 'flex justify-center items-center flex-nowrap gap-3';
             
-            // This container holds the score and the cards
-            const innerContainer = document.createElement('div');
-            innerContainer.appendChild(handScoreEl);
-            innerContainer.appendChild(handCardsEl);
-
-            handContainer.appendChild(innerContainer);
-            
-            // NEW: Check if this is the first hand
+            // --- FIXED BUG: Only create handScoreEl for split hands ---
             if (playerHands.length === 0) {
-                // This is the first hand, use the dedicated mobile score display
+                // This is the first hand. It does NOT get its own score span.
+                // The main H2 (playerScoreEl) is used for desktop.
+                // The main div (playerScoreMobile) is used for mobile.
+                handContainer.appendChild(handCardsEl);
                 playerHandEl.appendChild(handContainer);
-                handScoreEl.classList.add('hidden', 'md:block'); // Hide desktop score on mobile
                 
                 return {
                     hand: [],
@@ -781,9 +769,18 @@
                     scoreEl: playerScoreMobile.querySelector('.text-6xl') // Use the MAIN mobile score
                 };
             } else {
-                // This is a split hand, append it and use its own score display
+                // This is a split hand. It gets its own score span.
+                const handScoreEl = document.createElement('span');
+                handScoreEl.className = 'font-bold block text-center mb-2 text-6xl text-white md:text-lg md:text-white/70';
+                handScoreEl.textContent = '0';
+                handScoreEl.classList.remove('md:text-lg', 'md:text-white/70'); // Use mobile styles
+                
+                const innerContainer = document.createElement('div');
+                innerContainer.appendChild(handScoreEl);
+                innerContainer.appendChild(handCardsEl);
+                handContainer.appendChild(innerContainer);
+
                 playerHandEl.appendChild(handContainer);
-                handScoreEl.classList.remove('md:text-lg', 'md:text-white/70'); // Use mobile styles (large text)
                 
                 return {
                     hand: [],
@@ -1588,4 +1585,3 @@
     </script>
 </body>
 </html>
-
